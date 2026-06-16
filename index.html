@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mohamed Mostafa DEV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --black: #030508;
+    --deep: #070c12;
+    --surface: #0d1520;
+    --card: #111b28;
+    --card-hover: #162035;
+    --border: rgba(255,255,255,0.06);
+    --border-glow: rgba(99,179,237,0.25);
+    --gold: #c9a84c;
+    --gold-light: #e8c97e;
+    --gold-dim: rgba(201,168,76,0.15);
+    --blue: #63b3ed;
+    --blue-dim: rgba(99,179,237,0.12);
+    --text: #e8edf5;
+    --text-muted: #6b7c96;
+    --text-dim: #3d4f65;
+    --star: #f6c90e;
+    --green: #48bb78;
+  }
+
+  /* === CUSTOM CURSOR === */
+  * { cursor: none !important; }
+  #cursor-dot {
+    position: fixed; top: 0; left: 0; width: 8px; height: 8px;
+    background: var(--gold); border-radius: 50%;
+    pointer-events: none; z-index: 99999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.05s;
+    box-shadow: 0 0 12px var(--gold), 0 0 24px rgba(201,168,76,0.5);
+  }
+  #cursor-ring {
+    position: fixed; top: 0; left: 0; width: 36px; height: 36px;
+    border: 1.5px solid rgba(201,168,76,0.5);
+    border-radius: 50%; pointer-events: none; z-index: 99998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.18s ease, width 0.2s ease, height 0.2s ease, border-color 0.2s ease;
+  }
+  #cursor-ring.hovering {
+    width: 56px; height: 56px;
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.05);
+  }
+
+  /* === SCROLLBAR === */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+
+  /* === BASE === */
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* === CANVAS PARTICLES === */
+  #bg-canvas {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 0; pointer-events: none; opacity: 0.35;
+  }
+
+  /* === NAV === */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 1000;
+    padding: 20px 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(to bottom, rgba(3,5,8,0.95), transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    transition: all 0.3s ease;
+  }
+  nav.scrolled {
+    background: rgba(3,5,8,0.97);
+    padding: 14px 60px;
+  }
+  .nav-logo {
+    display: flex; align-items: center;
+    text-decoration: none;
+    position: relative;
+  }
+  .nav-logo img {
+    height: 44px; width: auto;
+    filter: drop-shadow(0 0 8px rgba(201,168,76,0.4));
+    transition: filter 0.3s ease;
+  }
+  .nav-logo:hover img {
+    filter: drop-shadow(0 0 16px rgba(201,168,76,0.7));
+  }
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a {
+    color: var(--text-muted); text-decoration: none;
+    font-size: 13px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+    font-family: 'Rajdhani', sans-serif;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px;
+    background: var(--gold); transition: width 0.3s ease;
+  }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-cta {
+    border: 1px solid var(--gold); color: var(--gold) !important;
+    padding: 8px 20px; border-radius: 2px;
+  }
+  .nav-cta:hover { background: var(--gold-dim) !important; }
+
+  /* === HERO === */
+  .hero {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 120px 60px 80px;
+    overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black, transparent);
+  }
+  .hero-glow-left {
+    position: absolute; left: -200px; top: 30%;
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-glow-right {
+    position: absolute; right: -200px; top: 20%;
+    width: 500px; height: 500px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(99,179,237,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-content {
+    text-align: center; max-width: 900px;
+    position: relative; z-index: 2;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px; letter-spacing: 5px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 28px;
+    opacity: 0; animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+  .hero-eyebrow::before, .hero-eyebrow::after {
+    content: ''; flex: 1; width: 40px; height: 1px; background: var(--gold); opacity: 0.5;
+  }
+  .hero-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(42px, 7vw, 88px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -1px;
+    margin-bottom: 6px;
+    opacity: 0; animation: fadeUp 0.8s ease 0.35s forwards;
+  }
+  .hero-name .line1 { color: var(--text); }
+  .hero-name .line2 {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px; letter-spacing: 6px; text-transform: uppercase;
+    color: var(--text-muted); margin: 20px 0 36px;
+    opacity: 0; animation: fadeUp 0.8s ease 0.5s forwards;
+  }
+  .hero-desc {
+    font-size: 16px; color: var(--text-muted);
+    max-width: 560px; margin: 0 auto 48px; line-height: 1.9;
+    opacity: 0; animation: fadeUp 0.8s ease 0.65s forwards;
+  }
+  .hero-stats {
+    display: flex; justify-content: center; gap: 60px;
+    margin-bottom: 52px;
+    opacity: 0; animation: fadeUp 0.8s ease 0.8s forwards;
+  }
+  .stat-item { text-align: center; }
+  .stat-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 36px; font-weight: 700;
+    color: var(--gold); display: block;
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--text-dim); margin-top: 6px;
+  }
+  .stat-divider { width: 1px; background: var(--border); }
+  .hero-btns {
+    display: flex; justify-content: center; gap: 16px;
+    opacity: 0; animation: fadeUp 0.8s ease 0.95s forwards;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: #000; padding: 14px 36px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 13px; letter-spacing: 3px;
+    text-transform: uppercase; text-decoration: none; border: none;
+    border-radius: 2px; transition: all 0.3s ease;
+    box-shadow: 0 0 30px rgba(201,168,76,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(201,168,76,0.5); }
+  .btn-outline {
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--text-muted); padding: 14px 36px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600; font-size: 13px; letter-spacing: 3px;
+    text-transform: uppercase; text-decoration: none;
+    border-radius: 2px; transition: all 0.3s ease;
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+  .hero-scroll {
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--text-dim); font-size: 10px; letter-spacing: 3px;
+    text-transform: uppercase; font-family: 'Rajdhani', sans-serif;
+    animation: pulse 2s ease infinite;
+  }
+  .hero-scroll i { font-size: 16px; animation: bounce 1.5s ease infinite; }
+
+  /* === SECTION COMMONS === */
+  section { position: relative; z-index: 1; }
+  .section-header {
+    text-align: center; margin-bottom: 60px;
+  }
+  .section-tag {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px; letter-spacing: 5px; text-transform: uppercase;
+    color: var(--gold); display: block; margin-bottom: 14px;
+  }
+  .section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(28px, 4vw, 46px); font-weight: 700;
+    color: var(--text); line-height: 1.2;
+  }
+  .section-title span {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .section-line {
+    width: 60px; height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    margin: 20px auto 0;
+  }
+
+  /* === ABOUT === */
+  .about { padding: 120px 60px; }
+  .about-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+  }
+  .about-visual {
+    position: relative; display: flex; justify-content: center;
+  }
+  .about-avatar-wrap {
+    position: relative; width: 280px; height: 280px;
+  }
+  .about-avatar-bg {
+    position: absolute; inset: -20px; border-radius: 50%;
+    border: 1px solid rgba(201,168,76,0.2);
+    animation: spin 15s linear infinite;
+  }
+  .about-avatar-bg::before {
+    content: ''; position: absolute; top: -4px; left: 50%; transform: translateX(-50%);
+    width: 8px; height: 8px; border-radius: 50%; background: var(--gold);
+  }
+  .about-avatar {
+    width: 280px; height: 280px; border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(201,168,76,0.3);
+    box-shadow: 0 0 60px rgba(201,168,76,0.12), inset 0 0 60px rgba(201,168,76,0.04);
+    position: relative; z-index: 1;
+  }
+  .about-avatar img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .about-avatar:hover img { transform: scale(1.05); }
+  .about-avatar-fallback {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--card) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 72px; font-weight: 900; color: var(--gold);
+  }
+  .about-badge {
+    position: absolute; bottom: 10px; right: -10px;
+    background: var(--gold); color: #000;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 11px; letter-spacing: 2px;
+    padding: 6px 14px; border-radius: 2px;
+    text-transform: uppercase;
+  }
+  .about-text h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 36px; font-weight: 700; color: var(--text);
+    margin-bottom: 8px;
+  }
+  .about-text h2 span { color: var(--gold); }
+  .about-subtitle {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px; letter-spacing: 3px; color: var(--text-muted);
+    text-transform: uppercase; margin-bottom: 24px;
+  }
+  .about-text p {
+    color: var(--text-muted); line-height: 2; margin-bottom: 14px; font-size: 15px;
+  }
+  .about-skills {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px;
+  }
+  .skill-tag {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-muted); padding: 6px 16px; border-radius: 2px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    transition: all 0.3s ease;
+  }
+  .skill-tag:hover { border-color: var(--gold); color: var(--gold); }
+  .social-row {
+    display: flex; gap: 12px; margin-top: 28px;
+  }
+  .social-btn {
+    width: 42px; height: 42px; border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); text-decoration: none; font-size: 15px;
+    transition: all 0.3s ease;
+  }
+  .social-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+  /* === APPS === */
+  .apps { padding: 120px 60px; background: var(--deep); }
+  .apps-inner { max-width: 1200px; margin: 0 auto; }
+  .apps-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  }
+  .app-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    position: relative;
+  }
+  .app-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0; transition: opacity 0.3s ease;
+  }
+  .app-card:hover { transform: translateY(-8px); border-color: var(--border-glow); background: var(--card-hover); }
+  .app-card:hover::before { opacity: 1; }
+  .app-img-wrap {
+    position: relative; overflow: hidden; height: 180px;
+    background: var(--surface);
+  }
+  .app-img-wrap img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  .app-card:hover .app-img-wrap img { transform: scale(1.06); }
+  .app-img-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(11,23,37,0.7) 0%, transparent 60%);
+  }
+  .app-icon-badge {
+    position: absolute; top: 14px; right: 14px;
+    width: 52px; height: 52px; border-radius: 12px;
+    overflow: hidden; border: 2px solid rgba(255,255,255,0.15);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .app-icon-badge img { width: 100%; height: 100%; object-fit: cover; }
+  .app-category {
+    position: absolute; top: 14px; left: 14px;
+    background: rgba(201,168,76,0.9); color: #000;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    padding: 3px 10px; border-radius: 2px; text-transform: uppercase;
+  }
+  .app-body { padding: 22px; }
+  .app-name {
+    font-family: 'Cairo', sans-serif;
+    font-size: 18px; font-weight: 700; color: var(--text);
+    margin-bottom: 6px; line-height: 1.3;
+  }
+  .app-desc {
+    font-size: 13px; color: var(--text-muted);
+    line-height: 1.7; margin-bottom: 18px;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .app-meta {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 18px;
+  }
+  .app-rating {
+    display: flex; align-items: center; gap: 5px;
+    font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: var(--star);
+  }
+  .app-rating i { font-size: 12px; }
+  .app-downloads {
+    display: flex; align-items: center; gap: 5px;
+    font-family: 'Rajdhani', sans-serif; font-size: 13px; color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+  .app-downloads i { color: var(--green); font-size: 11px; }
+  .app-footer {
+    display: flex; gap: 10px; align-items: center;
+    padding-top: 18px; border-top: 1px solid var(--border);
+  }
+  .app-dl-btn {
+    flex: 1; background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: #000; text-decoration: none;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px 18px; border-radius: 3px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    transition: all 0.3s ease;
+  }
+  .app-dl-btn:hover { box-shadow: 0 0 24px rgba(201,168,76,0.4); }
+  .app-play-badge {
+    display: flex; align-items: center; gap: 6px;
+    border: 1px solid var(--border); padding: 8px 14px; border-radius: 3px;
+    color: var(--text-muted); font-family: 'Rajdhani', sans-serif;
+    font-size: 11px; text-decoration: none; transition: all 0.3s ease;
+  }
+  .app-play-badge:hover { border-color: var(--blue); color: var(--blue); }
+  .show-more-wrap {
+    text-align: center; margin-top: 50px;
+    display: none;
+  }
+  .show-more-btn {
+    border: 1px solid rgba(201,168,76,0.3); color: var(--gold);
+    background: transparent; padding: 14px 44px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+    border-radius: 2px; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 10px;
+  }
+  .show-more-btn:hover { background: var(--gold-dim); transform: translateY(-2px); }
+  .hidden-apps { display: none; }
+  .hidden-apps.visible { display: contents; }
+
+  /* === CONTACT === */
+  .contact { padding: 120px 60px; }
+  .contact-inner { max-width: 700px; margin: 0 auto; text-align: center; }
+  .contact-inner p {
+    color: var(--text-muted); line-height: 2; font-size: 16px; margin-bottom: 48px;
+  }
+  .contact-cards {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px;
+  }
+  .contact-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; padding: 24px 16px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    transition: all 0.3s ease; text-decoration: none;
+  }
+  .contact-card:hover { border-color: var(--gold); background: var(--gold-dim); transform: translateY(-4px); }
+  .contact-card i { font-size: 24px; color: var(--gold); }
+  .contact-card span {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted);
+  }
+  .contact-card small { color: var(--text-dim); font-size: 12px; }
+
+  /* === FOOTER === */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--deep);
+  }
+  .footer-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px; font-weight: 700; color: var(--gold); letter-spacing: 3px;
+  }
+  .footer-copy {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px; color: var(--text-dim); letter-spacing: 1px;
+  }
+  .footer-links { display: flex; gap: 20px; }
+  .footer-links a {
+    color: var(--text-dim); text-decoration: none; font-size: 12px;
+    font-family: 'Rajdhani', sans-serif; transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--gold); }
+
+  /* === DIVIDER === */
+  .section-divider {
+    height: 1px; max-width: 1200px; margin: 0 auto;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+
+  /* === ANIMATIONS === */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; } 50% { opacity: 1; }
+  }
+  .reveal {
+    opacity: 0; transform: translateY(36px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    nav.scrolled { padding: 12px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 24px 60px; }
+    .hero-stats { gap: 28px; }
+    .stat-num { font-size: 26px; }
+    .about { padding: 80px 24px; }
+    .about-inner { grid-template-columns: 1fr; gap: 48px; }
+    .about-visual { display: none; }
+    .apps { padding: 80px 24px; }
+    .apps-grid { grid-template-columns: 1fr; }
+    .contact { padding: 80px 24px; }
+    .contact-cards { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 16px; text-align: center; padding: 32px 24px; }
+    .footer-links { justify-content: center; }
+  }
+  @media (max-width: 1100px) and (min-width: 901px) {
+    .apps-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- CUSTOM CURSOR -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- PARTICLE CANVAS -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">
+    <img src="https://i.ibb.co/vnwvwMc/LOGOMMDEV.png" alt="Mohamed Mostafa DEV Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <span style="display:none; font-family:'Orbitron',sans-serif; font-size:18px; font-weight:700; color:var(--gold); letter-spacing:3px;">MM.DEV</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">من أنا</a></li>
+    <li><a href="#apps">التطبيقات</a></li>
+    <li><a href="#contact" class="nav-cta">تواصل معي</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-grid"></div>
+  <div class="hero-glow-left"></div>
+  <div class="hero-glow-right"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">مطور تطبيقات اندرويد</div>
+    <h1 class="hero-name">
+      <div class="line1">MOHAMED</div>
+      <div class="line2">MOSTAFA</div>
+    </h1>
+    <p class="hero-title">Android Developer · Google Play Console</p>
+    <p class="hero-desc">
+      أبني تطبيقات موبايل احترافية تجمع بين الأداء العالي وتجربة المستخدم الاستثنائية —
+      من الفكرة إلى النشر على Google Play
+    </p>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-num" data-target="1">1</span>
+        <div class="stat-label">تطبيق منشور</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-num">5.0</span>
+        <div class="stat-label">متوسط التقييم</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-num">100+</span>
+        <div class="stat-label">تحميل</div>
+      </div>
+    </div>
+    <div class="hero-btns">
+      <a href="#apps" class="btn-primary"><i class="fas fa-th-large"></i> &nbsp;استعرض التطبيقات</a>
+      <a href="#contact" class="btn-outline">تواصل معي &nbsp;<i class="fas fa-arrow-left"></i></a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <i class="fas fa-chevron-down"></i>
+    <span>اسكرول</span>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-inner">
+    <div class="about-visual">
+      <div class="about-avatar-wrap">
+        <div class="about-avatar-bg"></div>
+        <div class="about-avatar">
+          <img src="https://i.ibb.co/vnwvwMc/LOGOMMDEV.png" alt="Mohamed Mostafa" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+          <div class="about-avatar-fallback" style="display:none">م</div>
+        </div>
+        <div class="about-badge"><i class="fab fa-google-play"></i> &nbsp;Verified Dev</div>
+      </div>
+    </div>
+    <div class="about-text reveal">
+      <div class="section-tag">من أنا</div>
+      <h2>محمد <span>مصطفى</span></h2>
+      <p class="about-subtitle">Android Developer · Egypt</p>
+      <p>مطور تطبيقات اندرويد متخصص في بناء تطبيقات موبايل عالية الجودة تخدم ملايين المستخدمين العرب. أهتم بكل تفصيلة في تجربة المستخدم والأداء.</p>
+      <p>أنشر تطبيقاتي عبر حساب <strong style="color:var(--gold)">Mohamed Mostafa DEV</strong> على Google Play Console، وأسعى دائماً لتقديم محتوى رقمي مفيد وذو قيمة حقيقية.</p>
+      <div class="about-skills">
+        <span class="skill-tag">Android Studio</span>
+        <span class="skill-tag">Java / Kotlin</span>
+        <span class="skill-tag">Firebase</span>
+        <span class="skill-tag">UI/UX Design</span>
+        <span class="skill-tag">Google Play</span>
+        <span class="skill-tag">تطبيقات القرآن</span>
+      </div>
+      <div class="social-row">
+        <a href="https://play.google.com/store/apps/developer?id=Mohamed+Mostafa+Dev" target="_blank" class="social-btn" title="Google Play">
+          <i class="fab fa-google-play"></i>
+        </a>
+        <a href="mailto:mohamedmostafaabasmostafa@gmail.com" class="social-btn" title="Email">
+          <i class="fas fa-envelope"></i>
+        </a>
+        <a href="tel:+201014708433" class="social-btn" title="Phone">
+          <i class="fas fa-phone"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- APPS -->
+<section class="apps" id="apps">
+  <div class="apps-inner">
+    <div class="section-header reveal">
+      <span class="section-tag">المنتجات</span>
+      <h2 class="section-title">تطبيقاتي على <span>Google Play</span></h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="apps-grid" id="appsGrid">
+
+      <!-- APP 1: ختمتي Khatmati -->
+      <div class="app-card reveal">
+        <div class="app-img-wrap">
+          <img src="https://play-lh.googleusercontent.com/mBzAzpi5paF9OuG4VxXiWNJn9XZEZAUq6oQUgV_8TqPVVessCCTYq3ROodlCC2_d4QNURmmc7ly6C6GoHO_x=w526-h296" alt="ختمتي - Khatmati">
+          <div class="app-img-overlay"></div>
+          <div class="app-icon-badge">
+            <img src="https://play-lh.googleusercontent.com/MG79ummCkr-4tlGRl3E7cvNY0k6AbeSAD1twXyHOuueXecz85jzyc5uzDqlZLAS32zM0edsnrijaWxZnj2OQfg=w240-h480" alt="icon">
+          </div>
+          <span class="app-category"><i class="fas fa-book-open"></i> &nbsp;تعليم</span>
+        </div>
+        <div class="app-body">
+          <div class="app-name">ختمتي — Khatmati</div>
+          <div class="app-desc">تطبيق عربي يساعدك على قراءة القرآن الكريم وتتبع تقدمك وتنظيم قراءتك اليومية بطريقة سهلة ومريحة</div>
+          <div class="app-meta">
+            <div class="app-rating"><i class="fas fa-star"></i> 5.0</div>
+            <div class="app-downloads"><i class="fas fa-download"></i> 100+ تحميل</div>
+          </div>
+          <div class="app-footer">
+            <a href="https://play.google.com/store/apps/details?id=com.khatmati.quranapp" target="_blank" class="app-dl-btn">
+              <i class="fab fa-google-play"></i> تنزيل مجاني
+            </a>
+            <a href="https://play.google.com/store/apps/details?id=com.khatmati.quranapp" target="_blank" class="app-play-badge">
+              <i class="fas fa-external-link-alt"></i> Play
+            </a>
+          </div>
+        </div>
+      </div>
+      <!-- More apps can be added here -->
+
+    </div>
+    <div class="show-more-wrap" id="showMoreWrap">
+      <button class="show-more-btn" id="showMoreBtn" onclick="toggleMore()">
+        <i class="fas fa-th-large"></i> عرض المزيد من التطبيقات
+      </button>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="contact-inner">
+    <div class="section-header reveal">
+      <span class="section-tag">تواصل</span>
+      <h2 class="section-title">تواصل <span>معي</span></h2>
+      <div class="section-line"></div>
+    </div>
+    <p>هل لديك مشروع تطبيق تريد تنفيذه؟ أو تريد التعاون معي؟ تواصل معي عبر القنوات التالية</p>
+    <div class="contact-cards">
+      <a href="mailto:mohamedmostafaabasmostafa@gmail.com" class="contact-card reveal">
+        <i class="fas fa-envelope"></i>
+        <span>البريد الإلكتروني</span>
+        <small>mohamedmostafaabasmostafa@gmail.com</small>
+      </a>
+      <a href="tel:+201014708433" class="contact-card reveal">
+        <i class="fas fa-phone"></i>
+        <span>رقم الهاتف</span>
+        <small>+20 101 470 8433</small>
+      </a>
+      <a href="https://play.google.com/store/apps/developer?id=Mohamed+Mostafa+Dev" target="_blank" class="contact-card reveal">
+        <i class="fab fa-google-play"></i>
+        <span>Google Play</span>
+        <small>Mohamed Mostafa DEV</small>
+      </a>
+    </div>
+    <a href="https://play.google.com/store/apps/developer?id=Mohamed+Mostafa+Dev" target="_blank" class="btn-primary">
+      <i class="fab fa-google-play"></i> &nbsp;زيارة صفحتي على Play Store
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <img src="https://i.ibb.co/vnwvwMc/LOGOMMDEV.png" alt="Logo" style="height:36px; width:auto; filter:drop-shadow(0 0 6px rgba(201,168,76,0.4))" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <span style="display:none; font-family:'Orbitron',sans-serif; font-size:16px; font-weight:700; color:var(--gold); letter-spacing:3px;">MM.DEV</span>
+  </div>
+  <div class="footer-copy">© 2025 Mohamed Mostafa DEV · All rights reserved</div>
+  <div class="footer-links">
+    <a href="#home">الرئيسية</a>
+    <a href="#apps">التطبيقات</a>
+    <a href="#contact">تواصل</a>
+  </div>
+</footer>
+
+<script>
+// === CURSOR ===
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+function animCursor() {
+  dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(animCursor);
+}
+animCursor();
+document.querySelectorAll('a, button, .app-card, .contact-card, .skill-tag').forEach(el => {
+  el.addEventListener('mouseenter', () => ring.classList.add('hovering'));
+  el.addEventListener('mouseleave', () => ring.classList.remove('hovering'));
+});
+
+// === PARTICLES ===
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+const GOLD = 'rgba(201,168,76,', BLUE = 'rgba(99,179,237,';
+for (let i = 0; i < 80; i++) {
+  particles.push({
+    x: Math.random()*2000-1000, y: Math.random()*1200-600,
+    vx: (Math.random()-.5)*.3, vy: (Math.random()-.5)*.3,
+    r: Math.random()*1.8+.3,
+    color: Math.random()>.6 ? GOLD : BLUE,
+    a: Math.random()*.7+.2
+  });
+}
+function drawParticles() {
+  ctx.clearRect(0,0,W,H);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < -1200) p.x = W+200; if (p.x > W+200) p.x = -1200;
+    if (p.y < -800) p.y = H+200; if (p.y > H+200) p.y = -800;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle = p.color + p.a + ')'; ctx.fill();
+  });
+  // connections
+  particles.forEach((a,i) => {
+    for (let j=i+1;j<particles.length;j++) {
+      const b=particles[j], dx=a.x-b.x, dy=a.y-b.y, d=Math.sqrt(dx*dx+dy*dy);
+      if (d<160) {
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle=GOLD+(0.08*(1-d/160))+')'; ctx.lineWidth=.5; ctx.stroke();
+      }
+    }
+  });
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// === NAV SCROLL ===
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// === REVEAL ON SCROLL ===
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); }});
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+// === SHOW MORE APPS ===
+function toggleMore() {
+  const hidden = document.querySelectorAll('.hidden-apps');
+  const btn = document.getElementById('showMoreBtn');
+  hidden.forEach(el => el.classList.toggle('visible'));
+  const isVisible = hidden[0]?.classList.contains('visible');
+  btn.innerHTML = isVisible
+    ? '<i class="fas fa-chevron-up"></i> عرض أقل'
+    : '<i class="fas fa-th-large"></i> عرض المزيد من التطبيقات';
+}
+
+// Check if there are hidden apps
+window.addEventListener('load', () => {
+  if (document.querySelectorAll('.hidden-apps').length > 0) {
+    document.getElementById('showMoreWrap').style.display = 'block';
+  }
+});
+
+// === SMOOTH ANCHOR SCROLL ===
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  });
+});
+</script>
+</body>
+</html>
