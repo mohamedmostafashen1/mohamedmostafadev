@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -757,7 +756,7 @@ body *, body *::before, body *::after {
 .apps-loading,.apps-error{grid-column:1/-1;min-height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:36px 24px;border:1px dashed rgba(255,154,82,.25);border-radius:24px;background:rgba(255,106,26,.025);color:var(--text-muted)}
 .apps-loading i,.apps-error i{font-size:34px;color:var(--gold)}
 .apps-loading i{animation:spin 1.2s linear infinite}
-.apps-error a{color:var(--gold-light);text-decoration:none;font-weight:800}
+.apps-error a,.apps-error button{color:var(--gold-light);text-decoration:none;font-weight:800}.apps-error-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}.apps-error button{font-family:'Tajawal',sans-serif;background:transparent;border:1px solid rgba(255,192,143,.22);border-radius:10px;padding:9px 15px;cursor:pointer!important}.apps-error button:hover{border-color:var(--gold);background:var(--gold-dim)}
 .official-site-pill{display:inline-flex;align-items:center;gap:7px;margin-inline-start:8px;padding:5px 10px;border:1px solid rgba(105,213,142,.25);border-radius:999px;background:rgba(105,213,142,.07);color:#8ee5aa;font-size:10px;font-weight:800;vertical-align:middle}
 </style>
 
@@ -1032,8 +1031,8 @@ async function loadApps() {
 
   try {
     const response = await fetch('/api/play-apps', { headers: { Accept: 'application/json' }, cache: 'no-store' });
-    if (!response.ok) throw new Error('PLAY_STORE_API_ERROR');
-    const payload = await response.json();
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload?.details?.direct || payload?.error || 'PLAY_STORE_API_ERROR');
     appsData = Array.isArray(payload.apps) ? payload.apps : [];
     setStoreStats(payload.stats || {});
     renderApps();
@@ -1047,7 +1046,7 @@ async function loadApps() {
     if (heroCount) heroCount.textContent = '—';
     if (averageRating) averageRating.textContent = '—';
     if (totalDownloads) totalDownloads.textContent = '—';
-    if (grid) grid.innerHTML = `<div class="apps-error"><i class="fab fa-google-play"></i><strong>تعذر جلب التطبيقات الآن</strong><a href="${DEVELOPER_URL}" target="_blank" rel="noopener noreferrer">عرض التطبيقات مباشرة على Google Play</a></div>`;
+    if (grid) grid.innerHTML = `<div class="apps-error"><i class="fab fa-google-play"></i><strong>تعذر جلب التطبيقات الآن</strong><div class="apps-error-actions"><button type="button" onclick="loadApps()"><i class="fas fa-rotate-right"></i> إعادة المحاولة</button><a href="${DEVELOPER_URL}" target="_blank" rel="noopener noreferrer">عرض حساب المطوّر الرسمي</a></div></div>`;
   }
 
   activateDynamicCards();
